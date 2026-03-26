@@ -1,0 +1,5 @@
+node_modules/
+la28.db
+*.pdf
+.env
+.DS_Store
