@@ -164,6 +164,17 @@ async function start() {
   // ---------------------------------------------------------------------------
   // Schedule reference routes
   // ---------------------------------------------------------------------------
+  app.get('/api/meta', (_req, res) => {
+    try {
+      const rows = dbAll('SELECT key, value FROM schedule_meta');
+      const meta = Object.fromEntries(rows.map(r => [r.key, r.value]));
+      return res.json(meta);
+    } catch (err) {
+      console.error(err);
+      return res.status(500).json({ error: 'Internal server error' });
+    }
+  });
+
   app.get('/api/sports', (_req, res) => {
     try {
       const rows = dbAll('SELECT DISTINCT sport FROM competition_schedule WHERE sport IS NOT NULL ORDER BY sport ASC');
