@@ -220,9 +220,9 @@ async function start() {
       if (date?.trim()) { conditions.push('date = ?'); params.push(date.trim()); }
       if (zone?.trim()) { conditions.push('zone = ?'); params.push(zone.trim()); }
       if (search?.trim()) {
-        conditions.push('(sport LIKE ? OR session_description LIKE ? OR venue LIKE ? OR session_type LIKE ?)');
+        conditions.push('(sport LIKE ? OR session_description LIKE ? OR venue LIKE ? OR session_type LIKE ? OR session_code LIKE ?)');
         const like = `%${search.trim()}%`;
-        params.push(like, like, like, like);
+        params.push(like, like, like, like, like);
       }
 
       const where = conditions.length ? `WHERE ${conditions.join(' AND ')}` : '';
