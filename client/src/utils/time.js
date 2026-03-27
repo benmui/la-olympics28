@@ -17,6 +17,7 @@ export function timeToMin(timeStr) {
  */
 export function formatTime(timeStr) {
   if (!timeStr) return ''
+  if (!/^\d{1,2}:\d{2}$/.test(timeStr.trim())) return timeStr.trim()
   const [hourStr, minuteStr] = timeStr.split(':')
   let hour = parseInt(hourStr, 10)
   const minute = minuteStr
