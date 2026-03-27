@@ -3,8 +3,11 @@
 Reads the LA28 Olympics competition schedule PDF and saves table rows to la28.db (SQLite3).
 """
 
+import re
 import sqlite3
 import pdfplumber
+from datetime import date
+from pathlib import Path
 
 PDF_FILE = "LA28OlympicGamesCompetitionScheduleByEventV3.0.pdf"
 DB_FILE = "la28.db"
@@ -13,7 +16,7 @@ EXPECTED_COLUMNS = ["Sport", "Venue", "Zone", "Session Code", "Date", "Games Day
                     "Session Type", "Session Description", "Start Time", "End Time"]
 
 
-def create_table(conn):
+def create_tables(conn):
     conn.execute("""
         CREATE TABLE IF NOT EXISTS competition_schedule (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -29,11 +32,20 @@ def create_table(conn):
             end_time TEXT
         )
     """)
+    conn.execute("""
+        CREATE TABLE IF NOT EXISTS schedule_meta (
+            key   TEXT PRIMARY KEY,
+            value TEXT NOT NULL
+        )
+    """)
     conn.commit()
 
 
-def is_header_row(row):
-    return row and row[0] == "Sport"
+def strip_newlines(value):
+    """Replace any newline characters with a single space and strip whitespace."""
+    if value is None:
+        return None
+    return re.sub(r'[\r\n]+', ' ', value).strip()
 
 
 def is_data_row(row):
@@ -58,7 +70,12 @@ def extract_rows(pdf_path):
                     if is_data_row(row):
                         # Pad or trim to exactly 10 columns
                         row = list(row) + [None] * 10
-                        rows.append(row[:10])
+                        row = row[:10]
+                        # Clean newlines from sport (col 0), start_time (col 8), end_time (col 9)
+                        row[0] = strip_newlines(row[0])
+                        row[8] = strip_newlines(row[8])
+                        row[9] = strip_newlines(row[9])
+                        rows.append(row)
     return rows
 
 
@@ -72,13 +89,29 @@ def insert_rows(conn, rows):
     conn.commit()
 
 
+def parse_version(pdf_filename):
+    """Extract version string from filename, e.g. 'V3.0' from '...V3.0.pdf'."""
+    match = re.search(r'(V[\d.]+)', Path(pdf_filename).stem, re.IGNORECASE)
+    return match.group(1) if match else 'Unknown'
+
+
+def save_meta(conn, pdf_filename):
+    version = parse_version(pdf_filename)
+    imported_on = date.today().isoformat()
+    conn.execute("INSERT OR REPLACE INTO schedule_meta (key, value) VALUES ('version', ?)", (version,))
+    conn.execute("INSERT OR REPLACE INTO schedule_meta (key, value) VALUES ('imported_on', ?)", (imported_on,))
+    conn.execute("INSERT OR REPLACE INTO schedule_meta (key, value) VALUES ('source_file', ?)", (Path(pdf_filename).name,))
+    conn.commit()
+
+
 def main():
     rows = extract_rows(PDF_FILE)
     print(f"Extracted {len(rows)} rows from {PDF_FILE}")
 
     conn = sqlite3.connect(DB_FILE)
-    create_table(conn)
+    create_tables(conn)
     insert_rows(conn, rows)
+    save_meta(conn, PDF_FILE)
     conn.close()
 
     print(f"Saved to {DB_FILE}")
