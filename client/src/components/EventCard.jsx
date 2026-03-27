@@ -85,6 +85,9 @@ export default function EventCard({ event }) {
         <div className="text-right">
           <p className="text-xs text-slate-600 font-medium">{event.venue}</p>
           <p className="text-xs text-slate-400">{event.zone}</p>
+          {event.session_code && (
+            <p className="text-xs text-slate-400 font-mono mt-0.5">{event.session_code}</p>
+          )}
         </div>
       </div>
 
