@@ -88,8 +88,14 @@ async function start() {
   // Express app
   // ---------------------------------------------------------------------------
   const app = express();
-  app.use(cors({ origin: 'http://localhost:5173' }));
+  app.use(cors());
   app.use(express.json());
+
+  // Serve built React client
+  const clientDist = path.resolve(__dirname, '../client/dist');
+  if (fs.existsSync(clientDist)) {
+    app.use(express.static(clientDist));
+  }
 
   // Auth middleware
   function requireAuth(req, res, next) {
@@ -332,6 +338,11 @@ async function start() {
       return res.status(500).json({ error: 'Internal server error' });
     }
   });
+
+  // Fall through to React for any non-API route
+  if (fs.existsSync(clientDist)) {
+    app.get('*', (_req, res) => res.sendFile(path.join(clientDist, 'index.html')));
+  }
 
   app.listen(PORT, () => console.log(`LA28 server running on http://localhost:${PORT}`));
 }
