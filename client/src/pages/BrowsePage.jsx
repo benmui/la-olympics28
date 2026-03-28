@@ -5,6 +5,14 @@ import { usePlans } from '../context/PlansContext'
 import { sportColor } from '../utils/colors'
 import EventCard from '../components/EventCard'
 
+const LA_ZONES = [
+  'DTLA', 'Exposition', 'Port of Los Angeles', 'Riviera', 'Universal City',
+  'Valley', 'Venice', 'Carson', 'Inglewood', 'Long Beach', 'Pasadena',
+  'Anaheim', 'Arcadia', 'City of Industry', 'Pomona',
+]
+const LA_ZONES_SET = new Set(LA_ZONES)
+const LA_ALL_VALUE = LA_ZONES.join(',')
+
 export default function BrowsePage() {
   const { activePlan } = usePlans()
 
@@ -92,6 +100,10 @@ export default function BrowsePage() {
   )
   const visibleSports = showAllSports ? filteredSports : filteredSports.slice(0, 15)
 
+  // Partition fetched zones into LA and non-LA groups
+  const laZones   = LA_ZONES.filter(z => zones.includes(z))
+  const otherZones = zones.filter(z => !LA_ZONES_SET.has(z))
+
   return (
     <div className="flex gap-6 items-start">
       {/* ── LEFT SIDEBAR ── */}
@@ -138,11 +150,19 @@ export default function BrowsePage() {
             className="w-full text-sm border border-slate-200 rounded-lg px-2.5 py-1.5 focus:outline-none focus:ring-2 focus:ring-blue-300 focus:border-blue-300 bg-white"
           >
             <option value="">All zones</option>
-            {zones.map(z => (
-              <option key={z} value={z}>
-                {z}
-              </option>
-            ))}
+            <option value={LA_ALL_VALUE}>Los Angeles (All Zones)</option>
+            <optgroup label="Los Angeles">
+              {laZones.map(z => (
+                <option key={z} value={z}>{z}</option>
+              ))}
+            </optgroup>
+            {otherZones.length > 0 && (
+              <optgroup label="Other Venues">
+                {otherZones.map(z => (
+                  <option key={z} value={z}>{z}</option>
+                ))}
+              </optgroup>
+            )}
           </select>
         </div>
 

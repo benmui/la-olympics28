@@ -218,7 +218,16 @@ async function start() {
         }
       }
       if (date?.trim()) { conditions.push('date = ?'); params.push(date.trim()); }
-      if (zone?.trim()) { conditions.push('zone = ?'); params.push(zone.trim()); }
+      if (zone?.trim()) {
+        const zoneList = zone.trim().split(',').map(z => z.trim()).filter(Boolean);
+        if (zoneList.length > 1) {
+          conditions.push(`zone IN (${zoneList.map(() => '?').join(', ')})`);
+          params.push(...zoneList);
+        } else {
+          conditions.push('zone = ?');
+          params.push(zoneList[0]);
+        }
+      }
       if (search?.trim()) {
         conditions.push('(sport LIKE ? OR session_description LIKE ? OR venue LIKE ? OR session_type LIKE ? OR session_code LIKE ?)');
         const like = `%${search.trim()}%`;
