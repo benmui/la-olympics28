@@ -135,9 +135,9 @@ export default function PlanDetail({ planId, events }) {
                         – {formatTime(event.end_time)}
                       </p>
                       {event.session_code && (
-                        <p className="text-xs font-mono text-slate-400 mt-1">
+                        <span className="inline-block text-xs font-mono font-semibold bg-blue-600 text-white px-1.5 py-0.5 rounded mt-1">
                           {event.session_code}
-                        </p>
+                        </span>
                       )}
                     </div>
 

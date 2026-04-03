@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react'
-import { Plus, Pencil, Trash2, Check, X } from 'lucide-react'
+import { Plus, Pencil, Trash2, Check, X, Download } from 'lucide-react'
 import { usePlans } from '../context/PlansContext'
 import PlanDetail from '../components/PlanDetail'
 import { conflictCount } from '../utils/time'
@@ -113,6 +113,26 @@ export default function PlansPage() {
   const conflicts = conflictCount(activeEvents)
 
   const activePlan = plans.find(p => p.id === activePlanId) ?? null
+
+  function exportCSV() {
+    const headers = ['Day', 'Date', 'Start Time', 'End Time', 'Session Code', 'Sport', 'Session Description', 'Session Type', 'Venue', 'Zone']
+    const rows = activeEvents
+      .slice()
+      .sort((a, b) => {
+        if (Number(a.games_day) !== Number(b.games_day)) return Number(a.games_day) - Number(b.games_day)
+        return (a.start_time || '').localeCompare(b.start_time || '')
+      })
+      .map(e => [e.games_day, e.date, e.start_time, e.end_time, e.session_code, e.sport, e.session_description, e.session_type, e.venue, e.zone]
+        .map(v => `"${(v ?? '').toString().replace(/"/g, '""')}"`)
+      )
+    const csv = [headers.map(h => `"${h}"`), ...rows].map(r => r.join(',')).join('\n')
+    const url = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8;' }))
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `${(activePlan?.name ?? 'plan').replace(/[^a-z0-9]/gi, '_')}_schedule.csv`
+    a.click()
+    URL.revokeObjectURL(url)
+  }
 
   return (
     <div className="flex flex-col md:flex-row gap-6 items-start">
@@ -276,9 +296,21 @@ export default function PlansPage() {
         ) : (
           <div>
             {/* Plan name heading */}
-            <h2 className="text-xl font-bold text-slate-800 mb-3">
-              {activePlan?.name ?? 'Plan'}
-            </h2>
+            <div className="flex items-center justify-between mb-3">
+              <h2 className="text-xl font-bold text-slate-800">
+                {activePlan?.name ?? 'Plan'}
+              </h2>
+              {activeEvents.length > 0 && (
+                <button
+                  onClick={exportCSV}
+                  className="flex items-center gap-1.5 text-sm font-medium text-blue-600 hover:text-blue-700 bg-blue-50 hover:bg-blue-100 border border-blue-200 rounded-lg px-3 py-1.5 transition-colors"
+                  title="Export to CSV (Google Sheets compatible)"
+                >
+                  <Download className="w-4 h-4" />
+                  Export CSV
+                </button>
+              )}
+            </div>
 
             {/* Stats row */}
             <div className="flex flex-wrap gap-2 mb-4">
