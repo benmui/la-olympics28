@@ -134,6 +134,11 @@ export default function PlanDetail({ planId, events }) {
                       <p className="text-xs text-slate-500">
                         – {formatTime(event.end_time)}
                       </p>
+                      {event.session_code && (
+                        <p className="text-xs font-mono text-slate-400 mt-1">
+                          {event.session_code}
+                        </p>
+                      )}
                     </div>
 
                     {/* Middle: details */}
