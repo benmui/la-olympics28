@@ -56,6 +56,10 @@ async function start() {
 
   db.run('PRAGMA foreign_keys = ON');
 
+  // Migrate plan_events to add tickets and purchased if they don't exist yet
+  try { db.run('ALTER TABLE plan_events ADD COLUMN tickets INTEGER DEFAULT NULL'); } catch (_) {}
+  try { db.run('ALTER TABLE plan_events ADD COLUMN purchased INTEGER DEFAULT 0'); } catch (_) {}
+
   db.exec(`
     CREATE TABLE IF NOT EXISTS users (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -303,7 +307,7 @@ async function start() {
       if (!ownsPlan(req.user.id, planId)) return res.status(404).json({ error: 'Plan not found' });
 
       const events = dbAll(`
-        SELECT cs.*
+        SELECT cs.*, pe.tickets, pe.purchased
         FROM plan_events pe
         JOIN competition_schedule cs ON cs.id = pe.event_id
         WHERE pe.plan_id = ?
@@ -346,11 +350,33 @@ async function start() {
     }
   });
 
+  app.patch('/api/plans/:id/events/:eventId', requireAuth, (req, res) => {
+    const planId = +req.params.id;
+    const eventId = +req.params.eventId;
+    const { tickets, purchased } = req.body;
+    try {
+      if (!ownsPlan(req.user.id, planId)) return res.status(404).json({ error: 'Plan not found' });
+      const fields = [];
+      const params = [];
+      if (tickets !== undefined) { fields.push('tickets = ?'); params.push(tickets === null ? null : +tickets); }
+      if (purchased !== undefined) { fields.push('purchased = ?'); params.push(purchased ? 1 : 0); }
+      if (!fields.length) return res.status(400).json({ error: 'No fields to update' });
+      params.push(planId, eventId);
+      dbRun(`UPDATE plan_events SET ${fields.join(', ')} WHERE plan_id = ? AND event_id = ?`, params);
+      return res.json({ success: true });
+    } catch (err) {
+      console.error(err);
+      return res.status(500).json({ error: 'Internal server error' });
+    }
+  });
+
   app.delete('/api/plans/:id/events/:eventId', requireAuth, (req, res) => {
     const planId = +req.params.id;
     const eventId = +req.params.eventId;
     try {
       if (!ownsPlan(req.user.id, planId)) return res.status(404).json({ error: 'Plan not found' });
+      const pe = dbGet('SELECT purchased FROM plan_events WHERE plan_id = ? AND event_id = ?', [planId, eventId]);
+      if (pe?.purchased) return res.status(403).json({ error: 'Cannot remove a purchased event' });
       dbRun('DELETE FROM plan_events WHERE plan_id = ? AND event_id = ?', [planId, eventId]);
       return res.json({ success: true });
     } catch (err) {
