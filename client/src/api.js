@@ -104,4 +104,8 @@ export const api = {
   removeEventFromPlan(planId, eventId) {
     return request('DELETE', `/plans/${planId}/events/${eventId}`)
   },
+
+  updatePlanEvent(planId, eventId, updates) {
+    return request('PATCH', `/plans/${planId}/events/${eventId}`, updates)
+  },
 }

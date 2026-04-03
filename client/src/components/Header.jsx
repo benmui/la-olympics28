@@ -27,7 +27,7 @@ export default function Header({ tab, onTabChange }) {
   }
 
   return (
-    <header className="bg-slate-900">
+    <header className="bg-slate-900 sticky top-0 z-30">
       {/* Top row */}
       <div className="max-w-screen-xl mx-auto px-4 h-14 flex items-center justify-between">
         {/* Left: branding */}

@@ -111,6 +111,8 @@ export default function PlansPage() {
   const uniqueSports = new Set(activeEvents.map(e => e.sport)).size
   const uniqueDays = new Set(activeEvents.map(e => e.games_day)).size
   const conflicts = conflictCount(activeEvents)
+  const totalTickets = activeEvents.reduce((sum, e) => sum + (e.tickets ? +e.tickets : 0), 0)
+  const purchasedTickets = activeEvents.reduce((sum, e) => sum + (e.purchased && e.tickets ? +e.tickets : 0), 0)
 
   const activePlan = plans.find(p => p.id === activePlanId) ?? null
 
@@ -295,32 +297,40 @@ export default function PlansPage() {
           </div>
         ) : (
           <div>
-            {/* Plan name heading */}
-            <div className="flex items-center justify-between mb-3">
-              <h2 className="text-xl font-bold text-slate-800">
-                {activePlan?.name ?? 'Plan'}
-              </h2>
-              {activeEvents.length > 0 && (
-                <button
-                  onClick={exportCSV}
-                  className="flex items-center gap-1.5 text-sm font-medium text-blue-600 hover:text-blue-700 bg-blue-50 hover:bg-blue-100 border border-blue-200 rounded-lg px-3 py-1.5 transition-colors"
-                  title="Export to CSV (Google Sheets compatible)"
-                >
-                  <Download className="w-4 h-4" />
-                  Export CSV
-                </button>
-              )}
-            </div>
+            {/* Sticky plan header */}
+            <div className="sticky top-[104px] z-20 bg-slate-50 pb-3 border-b border-slate-200 mb-4">
+              {/* Plan name heading */}
+              <div className="flex items-center justify-between mb-3">
+                <h2 className="text-xl font-bold text-slate-800">
+                  {activePlan?.name ?? 'Plan'}
+                </h2>
+                {activeEvents.length > 0 && (
+                  <button
+                    onClick={exportCSV}
+                    className="flex items-center gap-1.5 text-sm font-medium text-blue-600 hover:text-blue-700 bg-blue-50 hover:bg-blue-100 border border-blue-200 rounded-lg px-3 py-1.5 transition-colors"
+                    title="Export to CSV (Google Sheets compatible)"
+                  >
+                    <Download className="w-4 h-4" />
+                    Export CSV
+                  </button>
+                )}
+              </div>
 
-            {/* Stats row */}
-            <div className="flex flex-wrap gap-2 mb-4">
-              <StatChip label={`${activeEvents.length} event${activeEvents.length !== 1 ? 's' : ''}`} />
-              <StatChip label={`${uniqueSports} sport${uniqueSports !== 1 ? 's' : ''}`} />
-              <StatChip label={`${uniqueDays} day${uniqueDays !== 1 ? 's' : ''} with events`} />
-              <StatChip
-                label={`${conflicts} conflict${conflicts !== 1 ? 's' : ''}`}
-                variant={conflicts > 0 ? 'danger' : 'default'}
-              />
+              {/* Stats row */}
+              <div className="flex flex-wrap gap-2">
+                <StatChip label={`${activeEvents.length} event${activeEvents.length !== 1 ? 's' : ''}`} />
+                <StatChip label={`${uniqueSports} sport${uniqueSports !== 1 ? 's' : ''}`} />
+                <StatChip label={`${uniqueDays} day${uniqueDays !== 1 ? 's' : ''} with events`} />
+                <StatChip
+                  label={`${conflicts} conflict${conflicts !== 1 ? 's' : ''}`}
+                  variant={conflicts > 0 ? 'danger' : 'default'}
+                />
+                <StatChip label={`${totalTickets} ticket${totalTickets !== 1 ? 's' : ''} planned`} />
+                <StatChip
+                  label={`${purchasedTickets} ticket${purchasedTickets !== 1 ? 's' : ''} purchased`}
+                  variant={purchasedTickets > 0 ? 'success' : 'default'}
+                />
+              </div>
             </div>
 
             <PlanDetail
@@ -338,6 +348,8 @@ function StatChip({ label, variant = 'default' }) {
   const variantClass =
     variant === 'danger'
       ? 'bg-red-50 text-red-700 border-red-200'
+      : variant === 'success'
+      ? 'bg-green-50 text-green-700 border-green-200'
       : 'bg-slate-100 text-slate-600 border-slate-200'
   return (
     <span className={`text-xs font-medium px-3 py-1 rounded-full border ${variantClass}`}>

@@ -116,6 +116,15 @@ export function PlansProvider({ children }) {
     }
   }
 
+  async function updatePlanEvent(planId, eventId, updates) {
+    try {
+      await api.updatePlanEvent(planId, eventId, updates)
+    } catch (err) {
+      console.error('Failed to update plan event:', err)
+      throw err
+    }
+  }
+
   function isEventInPlan(planId, eventId) {
     const events = planEvents[planId]
     if (!Array.isArray(events)) return false
@@ -140,6 +149,7 @@ export function PlansProvider({ children }) {
         updatePlan,
         addEvent,
         removeEvent,
+        updatePlanEvent,
         isEventInPlan,
       }}
     >
