@@ -4,6 +4,7 @@ import { usePlans } from '../context/PlansContext'
 import { sportColor } from '../utils/colors'
 import { SESSION_TYPE_COLORS } from '../utils/colors'
 import { formatTime, hasConflict, conflictCount } from '../utils/time'
+import { formatEventDate } from '../utils/date'
 
 export default function PlanDetail({ planId, events }) {
   const { removeEvent, updatePlanEvent, fetchPlanEvents } = usePlans()
@@ -98,7 +99,7 @@ export default function PlanDetail({ planId, events }) {
               const date = dayEvents[0]?.date
               return (
                 <li key={day} className="text-xs text-red-600 ml-5">
-                  Day {day}{date ? ` · ${date}` : ''}: {dayEvents.map(e => e.session_description || e.session_code).join(', ')}
+                  Day {day}{date ? ` · ${formatEventDate(date)}` : ''}: {dayEvents.map(e => e.session_description || e.session_code).join(', ')}
                 </li>
               )
             })}

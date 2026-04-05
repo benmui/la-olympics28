@@ -2,17 +2,11 @@ import React, { useEffect, useRef, useState } from 'react'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { usePlans } from '../context/PlansContext'
 import { formatTime } from '../utils/time'
+import { parseISODate } from '../utils/date'
 import EventModal from '../components/EventModal'
 
-// ── Date helpers ─────────────────────────────────────────────────────────────
-// Games Day 0 = Friday, July 14, 2028
-const DAY0 = new Date(2028, 6, 14)
-
-function gamesDayToDate(gamesDay) {
-  const d = new Date(DAY0)
-  d.setDate(DAY0.getDate() + Number(gamesDay))
-  return d
-}
+// Initial calendar anchor: Games Day 0 = Friday, July 14, 2028
+const CALENDAR_ANCHOR = new Date(2028, 6, 14)
 
 function startOfWeek(date) {
   const d = new Date(date)
@@ -122,7 +116,7 @@ function WeekView({ events, weekStart, onEventClick }) {
           {/* Day columns */}
           {days.map((day, i) => {
             const dayEvents = events.filter(e =>
-              isSameDay(gamesDayToDate(e.games_day), day)
+              isSameDay(parseISODate(e.date), day)
             )
             return (
               <div
@@ -257,7 +251,7 @@ export default function CalendarPage() {
 
   const [selectedPlanId, setSelectedPlanId] = useState(null)
   const [view, setView]         = useState('week')
-  const [weekStart, setWeekStart] = useState(() => startOfWeek(DAY0))
+  const [weekStart, setWeekStart] = useState(() => startOfWeek(CALENDAR_ANCHOR))
   const [monthYear, setMonthYear] = useState({ year: 2028, month: 6 }) // July 2028
   const [selectedEvent, setSelectedEvent] = useState(null)
 
@@ -278,7 +272,7 @@ export default function CalendarPage() {
   useEffect(() => {
     if (!events.length || selectedPlanId === jumpedPlanRef.current) return
     const sorted = [...events].sort((a, b) => Number(a.games_day) - Number(b.games_day))
-    const firstDate = gamesDayToDate(sorted[0].games_day)
+    const firstDate = parseISODate(sorted[0].date)
     setWeekStart(startOfWeek(firstDate))
     setMonthYear({ year: firstDate.getFullYear(), month: firstDate.getMonth() })
     jumpedPlanRef.current = selectedPlanId

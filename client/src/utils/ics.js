@@ -1,18 +1,6 @@
-// Games Day 0 = Friday, July 14, 2028
-const DAY0 = new Date(2028, 6, 14)
-
-function gamesDayToDate(gamesDay) {
-  const d = new Date(DAY0)
-  d.setDate(DAY0.getDate() + Number(gamesDay))
-  return d
-}
-
-function icsDate(gamesDay) {
-  const d = gamesDayToDate(gamesDay)
-  const y = d.getFullYear()
-  const m = String(d.getMonth() + 1).padStart(2, '0')
-  const day = String(d.getDate()).padStart(2, '0')
-  return `${y}${m}${day}`
+function icsDate(isoDate) {
+  // "2028-07-14" → "20280714"
+  return (isoDate ?? '').replace(/-/g, '')
 }
 
 function icsTime(t) {
@@ -26,7 +14,7 @@ function escapeICS(str) {
 }
 
 export function generateICS(event) {
-  const dateStr  = icsDate(event.games_day)
+  const dateStr  = icsDate(event.date)
   const uid      = `la28-${event.id}@la28planner`
   const summary  = escapeICS(`${event.sport}${event.session_description ? ' – ' + event.session_description : ''}`)
   const location = escapeICS([event.venue, event.zone].filter(Boolean).join(', '))
