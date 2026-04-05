@@ -6,6 +6,7 @@ const TABS = [
   { id: 'browse', label: 'Browse Events' },
   { id: 'plans', label: 'My Plans' },
   { id: 'compare', label: 'Compare Plans' },
+  { id: 'calendar', label: 'Calendar' },
 ]
 
 export default function Header({ tab, onTabChange }) {

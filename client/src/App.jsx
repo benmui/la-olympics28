@@ -5,6 +5,7 @@ import AuthPage from './pages/AuthPage'
 import BrowsePage from './pages/BrowsePage'
 import PlansPage from './pages/PlansPage'
 import ComparePage from './pages/ComparePage'
+import CalendarPage from './pages/CalendarPage'
 import Header from './components/Header'
 
 function Footer() {
@@ -35,6 +36,7 @@ function MainApp() {
         {tab === 'browse' && <BrowsePage />}
         {tab === 'plans' && <PlansPage />}
         {tab === 'compare' && <ComparePage />}
+        {tab === 'calendar' && <CalendarPage />}
       </main>
       <Footer />
     </div>
