@@ -1,7 +1,12 @@
 import React, { useState } from 'react'
+import { ExternalLink } from 'lucide-react'
 import { usePlans } from '../context/PlansContext'
 import { sportColor, SESSION_TYPE_COLORS } from '../utils/colors'
 import { formatTime } from '../utils/time'
+
+function ticketUrl(sessionCode) {
+  return `https://tickets.la28.org/search/?affiliate=28T&searchterm=${encodeURIComponent(sessionCode)}`
+}
 
 export default function EventCard({ event }) {
   const { activePlanId, isEventInPlan, addEvent, removeEvent } = usePlans()
@@ -91,8 +96,23 @@ export default function EventCard({ event }) {
         </div>
       </div>
 
+      {/* Buy Tickets link */}
+      {event.session_code && (
+        <div className="mt-3">
+          <a
+            href={ticketUrl(event.session_code)}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center justify-center gap-1.5 w-full rounded-lg px-3 py-1.5 text-xs font-medium text-emerald-700 bg-emerald-50 border border-emerald-200 hover:bg-emerald-100 transition-colors"
+          >
+            <ExternalLink className="w-3.5 h-3.5" />
+            Buy Tickets
+          </a>
+        </div>
+      )}
+
       {/* Add / Remove button */}
-      <div className="mt-3">
+      <div className="mt-2">
         {!activePlanId ? (
           <button
             disabled

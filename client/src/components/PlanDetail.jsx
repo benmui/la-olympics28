@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { X, AlertTriangle, Ticket, Lock } from 'lucide-react'
+import { X, AlertTriangle, Ticket, Lock, ExternalLink } from 'lucide-react'
 import { usePlans } from '../context/PlansContext'
 import { sportColor } from '../utils/colors'
 import { SESSION_TYPE_COLORS } from '../utils/colors'
@@ -268,6 +268,21 @@ export default function PlanDetail({ planId, events }) {
                         {isPurchased ? 'Purchased' : 'Purchased?'}
                       </span>
                     </div>
+
+                    {/* Buy Tickets button */}
+                    {event.session_code && (
+                      <div className="px-3 pb-3">
+                        <a
+                          href={`https://tickets.la28.org/search/?affiliate=28T&searchterm=${encodeURIComponent(event.session_code)}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-center justify-center gap-1.5 w-full rounded-lg px-3 py-1.5 text-xs font-medium text-emerald-700 bg-emerald-50 border border-emerald-200 hover:bg-emerald-100 transition-colors"
+                        >
+                          <ExternalLink className="w-3.5 h-3.5" />
+                          Buy Tickets
+                        </a>
+                      </div>
+                    )}
                   </div>
 
                   {/* Conflict detail */}
