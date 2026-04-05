@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { usePlans } from '../context/PlansContext'
 import { formatTime } from '../utils/time'
+import EventModal from '../components/EventModal'
 
 // ── Date helpers ─────────────────────────────────────────────────────────────
 // Games Day 0 = Friday, July 14, 2028
@@ -65,7 +66,7 @@ function eventClasses(purchased) {
 }
 
 // ── Week View ────────────────────────────────────────────────────────────────
-function WeekView({ events, weekStart }) {
+function WeekView({ events, weekStart, onEventClick }) {
   const days = Array.from({ length: 7 }, (_, i) => addDays(weekStart, i))
   const hours = Array.from({ length: END_HOUR - START_HOUR }, (_, i) => START_HOUR + i)
   const totalHeight = (END_HOUR - START_HOUR) * HOUR_HEIGHT
@@ -151,7 +152,8 @@ function WeekView({ events, weekStart }) {
                   return (
                     <div
                       key={event.id}
-                      className={`absolute left-0.5 right-0.5 rounded-md px-1.5 py-0.5 border-l-2 overflow-hidden select-none ${eventClasses(event.purchased)}`}
+                      onClick={() => onEventClick(event)}
+                      className={`absolute left-0.5 right-0.5 rounded-md px-1.5 py-0.5 border-l-2 overflow-hidden cursor-pointer hover:brightness-95 transition-all ${eventClasses(event.purchased)}`}
                       style={{ top: top + 1, height }}
                       title={`${event.sport} · ${formatTime(event.start_time)}–${formatTime(event.end_time)} · ${event.venue}`}
                     >
@@ -179,7 +181,7 @@ function WeekView({ events, weekStart }) {
 }
 
 // ── Month View ───────────────────────────────────────────────────────────────
-function MonthView({ events, year, month }) {
+function MonthView({ events, year, month, onEventClick }) {
   const firstDay  = new Date(year, month, 1)
   const lastDate  = new Date(year, month + 1, 0).getDate()
   const startPad  = firstDay.getDay()
@@ -230,7 +232,8 @@ function MonthView({ events, year, month }) {
                     {dayEvents.map(event => (
                       <div
                         key={event.id}
-                        className={`text-xs rounded px-1 py-0.5 truncate border-l-2 ${eventClasses(event.purchased)}`}
+                        onClick={() => onEventClick(event)}
+                        className={`text-xs rounded px-1 py-0.5 truncate border-l-2 cursor-pointer hover:brightness-95 transition-all ${eventClasses(event.purchased)}`}
                         title={`${event.sport} · ${formatTime(event.start_time)}–${formatTime(event.end_time)} · ${event.venue}`}
                       >
                         <span className="font-semibold">{formatTime(event.start_time)}</span>{' '}
@@ -253,9 +256,10 @@ export default function CalendarPage() {
   const { plans, planEvents, fetchPlanEvents, activePlanId } = usePlans()
 
   const [selectedPlanId, setSelectedPlanId] = useState(null)
-  const [view, setView]     = useState('week')
+  const [view, setView]         = useState('week')
   const [weekStart, setWeekStart] = useState(() => startOfWeek(DAY0))
   const [monthYear, setMonthYear] = useState({ year: 2028, month: 6 }) // July 2028
+  const [selectedEvent, setSelectedEvent] = useState(null)
 
   // Default to the active plan
   useEffect(() => {
@@ -382,9 +386,18 @@ export default function CalendarPage() {
           This plan has no events yet.
         </div>
       ) : view === 'week' ? (
-        <WeekView events={events} weekStart={weekStart} />
+        <WeekView events={events} weekStart={weekStart} onEventClick={setSelectedEvent} />
       ) : (
-        <MonthView events={events} year={monthYear.year} month={monthYear.month} />
+        <MonthView events={events} year={monthYear.year} month={monthYear.month} onEventClick={setSelectedEvent} />
+      )}
+
+      {/* Event detail modal */}
+      {selectedEvent && (
+        <EventModal
+          event={selectedEvent}
+          planId={selectedPlanId}
+          onClose={() => setSelectedEvent(null)}
+        />
       )}
     </div>
   )
