@@ -4,6 +4,7 @@ import { usePlans } from '../context/PlansContext'
 import { sportColor, SESSION_TYPE_COLORS } from '../utils/colors'
 import { formatTime } from '../utils/time'
 import { downloadICS } from '../utils/ics'
+import { formatEventDate } from '../utils/date'
 import EventDetailContent from './EventDetailContent'
 
 const TICKET_BASE = 'https://tickets.la28.org/search/?affiliate=28T&searchterm='
@@ -119,7 +120,7 @@ export default function EventModal({ event, planId, onClose }) {
             <div className="space-y-0.5">
               <p className="text-xs text-slate-500">
                 <span className="font-medium text-slate-700">Day {event.games_day}</span>
-                {event.date ? ` · ${event.date}` : ''}
+                {event.date ? ` · ${formatEventDate(event.date)}` : ''}
               </p>
               <p className="text-sm font-semibold text-slate-800">
                 {formatTime(event.start_time)} – {formatTime(event.end_time)}

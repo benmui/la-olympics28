@@ -5,6 +5,7 @@ import TimelineView from '../components/TimelineView'
 import { sportColor } from '../utils/colors'
 import { SESSION_TYPE_COLORS } from '../utils/colors'
 import { formatTime, conflictCount, hasConflict } from '../utils/time'
+import { formatEventDate } from '../utils/date'
 
 export default function ComparePage() {
   const { plans } = usePlans()
@@ -163,7 +164,7 @@ export default function ComparePage() {
                       : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50'
                   }`}
                 >
-                  Day {day}{date ? ` · ${date}` : ''}
+                  Day {day}{date ? ` · ${formatEventDate(date)}` : ''}
                 </button>
               )
             })}
@@ -176,7 +177,7 @@ export default function ComparePage() {
         <div className="mb-6">
           <h3 className="text-sm font-semibold text-slate-600 mb-2">
             Timeline — Day {selectedDay}
-            {getDateForDay(selectedDay) ? ` · ${getDateForDay(selectedDay)}` : ''}
+            {getDateForDay(selectedDay) ? ` · ${formatEventDate(getDateForDay(selectedDay))}` : ''}
           </h3>
           <TimelineView
             planAEvents={planAEvents}

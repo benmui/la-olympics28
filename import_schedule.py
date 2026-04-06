@@ -15,6 +15,32 @@ DB_FILE = "la28.db"
 EXPECTED_COLUMNS = ["Sport", "Venue", "Zone", "Session Code", "Date", "Games Day",
                     "Session Type", "Session Description", "Start Time", "End Time"]
 
+GAMES_YEAR = 2028
+MONTH_MAP = {
+    'January': 1, 'February': 2, 'March': 3, 'April': 4,
+    'May': 5, 'June': 6, 'July': 7, 'August': 8,
+    'September': 9, 'October': 10, 'November': 11, 'December': 12,
+}
+
+
+def parse_date_to_iso(raw):
+    """Convert 'Monday, July 14' or 'July 14' to '2028-07-14'. Returns raw if unparseable."""
+    if not raw:
+        return raw
+    # Strip weekday prefix if present: "Monday, July 14" → "July 14"
+    clean = re.sub(r'^[A-Za-z]+,\s*', '', raw.strip())
+    parts = clean.split()
+    if len(parts) >= 2:
+        month_name = parts[0].strip(',')
+        month = MONTH_MAP.get(month_name)
+        try:
+            day = int(parts[1].strip(','))
+        except ValueError:
+            return raw
+        if month:
+            return f"{GAMES_YEAR}-{month:02d}-{day:02d}"
+    return raw
+
 
 def create_tables(conn):
     conn.execute("""
@@ -73,6 +99,7 @@ def extract_rows(pdf_path):
                         row = row[:10]
                         # Clean newlines from sport (col 0), start_time (col 8), end_time (col 9)
                         row[0] = strip_newlines(row[0])
+                        row[4] = parse_date_to_iso(strip_newlines(row[4]))
                         row[8] = strip_newlines(row[8])
                         row[9] = strip_newlines(row[9])
                         rows.append(row)

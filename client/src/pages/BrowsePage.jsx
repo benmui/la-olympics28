@@ -3,6 +3,7 @@ import { Search } from 'lucide-react'
 import { api } from '../api'
 import { usePlans } from '../context/PlansContext'
 import { sportColor } from '../utils/colors'
+import { formatEventDate } from '../utils/date'
 import EventCard from '../components/EventCard'
 
 const LA_ZONES = [
@@ -135,7 +136,7 @@ export default function BrowsePage() {
             <option value="">All dates</option>
             {dates.map(d => (
               <option key={d.date} value={d.date}>
-                Day {d.games_day} · {d.date}
+                Day {d.games_day} · {formatEventDate(d.date)}
               </option>
             ))}
           </select>

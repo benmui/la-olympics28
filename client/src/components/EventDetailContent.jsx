@@ -1,6 +1,7 @@
 import React from 'react'
 import { sportColor, SESSION_TYPE_COLORS } from '../utils/colors'
 import { formatTime } from '../utils/time'
+import { formatEventDate } from '../utils/date'
 
 /**
  * Shared event information display used across Browse (card), Calendar (modal), etc.
@@ -50,7 +51,7 @@ export default function EventDetailContent({ event, compact = false }) {
           <div className="mt-3 border-t border-slate-100" />
           <div className="mt-2 flex justify-between items-end">
             <div>
-              <p className="text-xs text-slate-500">Day {event.games_day} · {event.date}</p>
+              <p className="text-xs text-slate-500">Day {event.games_day} · {formatEventDate(event.date)}</p>
               <p className="text-sm font-semibold text-slate-800">
                 {formatTime(event.start_time)} – {formatTime(event.end_time)}
               </p>
@@ -66,7 +67,7 @@ export default function EventDetailContent({ event, compact = false }) {
         <div className="mt-3 space-y-1">
           <p className="text-xs text-slate-500">
             <span className="font-medium text-slate-700">Day {event.games_day}</span>
-            {event.date ? ` · ${event.date}` : ''}
+            {event.date ? ` · ${formatEventDate(event.date)}` : ''}
           </p>
           <p className="text-sm font-semibold text-slate-800">
             {formatTime(event.start_time)} – {formatTime(event.end_time)}
